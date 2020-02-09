@@ -2,6 +2,9 @@
 // This file defines a function which traverses a file system in breadth-first order
 
 #include "queue.h"
+#include "options.h"
+#include "visit.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,10 +14,9 @@
 #include <dirent.h>
 
 char * getPath(char *, struct dirent *);
-void visit(char *);
 int isADirectory(char *);
 
-void breadthfirst (char * root, Queue * q){
+void breadthfirst (char * root, Queue * q, Options opts ){
 	char * currentPath;		// The current absolute path
 	DIR * currentDir;		// The current DIR
 
@@ -29,7 +31,7 @@ void breadthfirst (char * root, Queue * q){
 		while (nextDirent = readdir(currentDir)){
 			char * nextPath = getPath(currentPath, nextDirent);
 			if (notSelfOrParent(nextPath)){
-				visit(nextPath);
+				visit(nextPath, opts);
 				if (isADirectory(nextPath)){
 					enqueue(nextPath, q);
 				}
@@ -40,18 +42,13 @@ void breadthfirst (char * root, Queue * q){
 
 // Returns the name member of the dirent param appended to the path param
 char * getPath(char * pathParam, struct dirent * direntParam){
-	char * path = malloc(strlen(pathParam) + strlen(direntParam->d_name) + 1);
+	char * path = malloc(strlen(pathParam) + strlen(direntParam->d_name) + 2);
 
 	strcpy(path, pathParam);
 	strcat(path, "/");
 	strcat(path, direntParam->d_name);
 
 	return path;
-}
-
-// Prints the path
-void visit(char * path) {
-	printf("%s\n", path);
 }
 
 // Returns true if path is a direcoty. Adapted from Unix Systems Programming p. 157
