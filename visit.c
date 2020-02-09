@@ -7,10 +7,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <pwd.h>
 
 static struct stat * getStats(char * path);
 static void printType(struct stat *);
 static void printPermissions(struct stat*);
+
+static void printUid(struct stat *);
 
 void visit(char * path, Options opts){
 	struct stat * statPtr;  // Pointer to a stat structure
@@ -20,6 +23,8 @@ void visit(char * path, Options opts){
 	
 	if (opts.type) printType(statPtr);
 	if (opts.permissions) printPermissions(statPtr);
+
+	if (opts.uid) printUid(statPtr);
 
 	printf(path);
 	printf("\n");
@@ -65,5 +70,22 @@ static void printPermissions(struct stat * statPtr){
 
 	printf(permissions);
 }
+
+
+
+static void printUid(struct stat * statPtr){
+	struct passwd * pwPtr = getpwuid(statPtr->st_uid);
+	
+	char username[100];
+	strcpy(username, pwPtr->pw_name);
+	
+	printf(username);
+	printf(" ");
+}
+	
+
+
+
+
 
 
