@@ -8,12 +8,15 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <pwd.h>
+#include <time.h>
+#define CTIME_SIZE 26
 
 static struct stat * getStats(char * path);
 static void printType(struct stat *);
 static void printPermissions(struct stat*);
 
 static void printUid(struct stat *);
+static void printDateAndTimeModified(struct stat *);
 
 void visit(char * path, Options opts){
 	struct stat * statPtr;  // Pointer to a stat structure
@@ -25,6 +28,8 @@ void visit(char * path, Options opts){
 	if (opts.permissions) printPermissions(statPtr);
 
 	if (opts.uid) printUid(statPtr);
+
+	if (opts.dateAndTimeModified) printDateAndTimeModified(statPtr);
 
 	printf(path);
 	printf("\n");
@@ -85,7 +90,11 @@ static void printUid(struct stat * statPtr){
 	
 
 
-
-
-
-
+static void printDateAndTimeModified(struct stat * statPtr){
+	char mtime[CTIME_SIZE];
+	strncpy(mtime, ctime(&(statPtr->st_mtime)), CTIME_SIZE - 1);
+	mtime[CTIME_SIZE - 2] = 0;
+	printf(mtime);
+	printf(" ");
+}
+	
