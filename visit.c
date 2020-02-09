@@ -9,13 +9,15 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <time.h>
+#include <grp.h>
 #define CTIME_SIZE 26
 
 static struct stat * getStats(char * path);
 static void printType(struct stat *);
-static void printPermissions(struct stat*);
+static void printPermissions(struct stat *);
 
 static void printUid(struct stat *);
+static void printGid(struct stat *);
 static void printDateAndTimeModified(struct stat *);
 
 void visit(char * path, Options opts){
@@ -28,7 +30,7 @@ void visit(char * path, Options opts){
 	if (opts.permissions) printPermissions(statPtr);
 
 	if (opts.uid) printUid(statPtr);
-
+	if (opts.gid) printGid(statPtr);
 	if (opts.dateAndTimeModified) printDateAndTimeModified(statPtr);
 
 	printf(path);
@@ -88,7 +90,11 @@ static void printUid(struct stat * statPtr){
 	printf(" ");
 }
 	
-
+static void printGid(struct stat * statPtr){
+	struct group * groupPtr = getgrgid(statPtr->st_gid);
+	printf(groupPtr->gr_name);
+	printf("  ");
+}
 
 static void printDateAndTimeModified(struct stat * statPtr){
 	char mtime[CTIME_SIZE];
