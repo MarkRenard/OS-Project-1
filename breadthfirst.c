@@ -13,20 +13,27 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+void printErrorAndExit(char * path, const char * progName);
 char * getPath(char *, struct dirent *);
 int shouldFollow(char *, int);
 int notSelfOrParent(char *);
 
 // Prints selected info on files in breadth first order starting with root
-void breadthfirst (char * root, Queue * q, Options opts ){
+void breadthfirst (char * root, Queue * q, Options opts, const char * progName){
 	char * currentPath;		// The current absolute path
 	DIR * currentDir;		// The current DIR
 	struct dirent * nextDirent;	// The next dirent
 	
 	// Visits each file in breadth first order
-	enqueue(root, q);
+	if (shouldFollow(root, opts.links)){
+		enqueue(root, q);
+	}
+
 	while ((currentPath = dequeue(q)) != NULL){
 		currentDir = opendir(currentPath);
+		
+		// Prints an error and exits if no such directory exists
+		if (currentDir == NULL) printErrorAndExit(currentPath, progName);
 
 		// Visits each file directly below currentPath
 		while ( (nextDirent = readdir(currentDir)) ){
@@ -47,6 +54,16 @@ void breadthfirst (char * root, Queue * q, Options opts ){
 	}
 }
 
+// Prints an error message and exists
+void printErrorAndExit(char * path, const char * progName){
+	char errMsg[100];
+
+	sprintf(errMsg, "%s: Error:  Cannot open %s", progName, path);
+	perror(errMsg);
+
+	exit(1);
+}
+ 
 // Returns the name member of the dirent param appended to the path param
 char * getPath(char * pathParam, struct dirent * direntParam){
 	char * path; // The return value

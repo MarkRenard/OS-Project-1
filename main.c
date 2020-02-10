@@ -15,11 +15,12 @@
 #include <dirent.h>
 
 int main(int argc, char * const argv[]){
-	
-	//
-	char ** dir = (char**) malloc(sizeof(char**));
-	Options opts; 
-	
+	char ** dir;	// Pointer to root directory string	
+	Options opts;	// Struct that indicates selected options
+
+	// Allocates memory for root directory string
+	dir = (char**) malloc(sizeof(char**));
+
 	// Parses options
 	opts = parseOptions(argc, argv, dir);
 
@@ -27,7 +28,7 @@ int main(int argc, char * const argv[]){
 	Queue * q = newQueue();
 
 	// Traverses the file structure with root *dir in breadth frist order
-	breadthfirst(*dir, q, opts);
+	breadthfirst(*dir, q, opts, argv[0]);
 
 	return 0;
 }

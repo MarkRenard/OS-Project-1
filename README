@@ -2,7 +2,7 @@ bt is a utility which traverses a directory tree rooted at the specified
 directory in breadth-first order. The program can be invoked in the
 following way:
 
-	bt [-h] [-L -d -g -i -p -s -t -u | -l] [dirname]
+	./bt [-h] [-L -d -g -i -p -s -t -u | -l] [dirname]
 
 The options listed above are interpreted in the following way:
 
@@ -18,7 +18,8 @@ The options listed above are interpreted in the following way:
 	l	Prints information as if options tpiugsd are specified
 
 The directory is specified as the positional argument after options. If no
-directory is specified, the current working directory will be used.
+directory is specified, the current working directory will be used. The
+directory 'a' and its symbolic link 'alink' can be used for testing.
 
 To compile the program, simply type 'make' in the project directory. Type
 'git log' to access a log of how the program files are modified.
