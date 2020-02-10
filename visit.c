@@ -19,7 +19,7 @@
 static struct stat * getStats(char * path);
 static void printType(struct stat *);
 static void printPermissions(struct stat *);
-
+static void printNumLinksInInodeTable(struct stat *);
 static void printUid(struct stat *);
 static void printGid(struct stat *);
 static void printSize(struct stat *);
@@ -33,7 +33,7 @@ void visit(char * path, Options opts){
 	
 	if (opts.type) printType(statPtr);
 	if (opts.permissions) printPermissions(statPtr);
-
+	if (opts.inodeLinks) printNumLinksInInodeTable(statPtr);
 	if (opts.uid) printUid(statPtr);
 	if (opts.gid) printGid(statPtr);
 	if (opts.size) printSize(statPtr);
@@ -84,7 +84,10 @@ static void printPermissions(struct stat * statPtr){
 	printf(permissions);
 }
 
-
+// Prints the number of links to the file
+static void printNumLinksInInodeTable(struct stat * statPtr){
+	printf("%d ", statPtr->st_nlink);
+}
 
 static void printUid(struct stat * statPtr){
 	struct passwd * pwPtr = getpwuid(statPtr->st_uid);
@@ -124,7 +127,7 @@ static void printSize(struct stat * statPtr){
 		unit = 'G';
 	}
 
-	printf("%5lu%c ", numUnits, unit);
+	printf("%4lu%c ", numUnits, unit);
 }
 
 static void printDateAndTimeModified(struct stat * statPtr){
