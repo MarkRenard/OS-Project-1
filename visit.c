@@ -10,7 +10,11 @@
 #include <pwd.h>
 #include <time.h>
 #include <grp.h>
+
 #define CTIME_SIZE 26
+#define KILO 1024ULL
+#define MEGA 1048576ULL
+#define GIGA 1073741824ULL
 
 static struct stat * getStats(char * path);
 static void printType(struct stat *);
@@ -18,6 +22,7 @@ static void printPermissions(struct stat *);
 
 static void printUid(struct stat *);
 static void printGid(struct stat *);
+static void printSize(struct stat *);
 static void printDateAndTimeModified(struct stat *);
 
 void visit(char * path, Options opts){
@@ -31,6 +36,7 @@ void visit(char * path, Options opts){
 
 	if (opts.uid) printUid(statPtr);
 	if (opts.gid) printGid(statPtr);
+	if (opts.size) printSize(statPtr);
 	if (opts.dateAndTimeModified) printDateAndTimeModified(statPtr);
 
 	printf(path);
@@ -93,7 +99,32 @@ static void printUid(struct stat * statPtr){
 static void printGid(struct stat * statPtr){
 	struct group * groupPtr = getgrgid(statPtr->st_gid);
 	printf(groupPtr->gr_name);
-	printf("  ");
+	printf(" ");
+}
+
+// Prints the size of the file in gigabytes, megabytes, kilobytes, or bytes
+static void printSize(struct stat * statPtr){
+	unsigned long KB = 1024UL;
+	unsigned long MB = 1024UL * 1024UL;
+	unsigned long GB = 1024UL * 1024UL * 1024UL;
+
+	// Retrieves the size of the file from the stat struct 
+	unsigned long numBytes = (unsigned long) statPtr->st_size;
+	unsigned long numUnits = numBytes;
+	char unit = ' ';
+
+	if (numBytes > KB){
+		numUnits = numBytes / KB;
+		unit = 'K';
+	} else if (numBytes > MB) {
+		numUnits = numBytes / MB;
+		unit = 'M';
+	} else if (numBytes > GB) {
+		numUnits = numBytes / GB;
+		unit = 'G';
+	}
+
+	printf("%5lu%c ", numUnits, unit);
 }
 
 static void printDateAndTimeModified(struct stat * statPtr){
