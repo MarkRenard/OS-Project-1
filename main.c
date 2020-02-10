@@ -1,5 +1,7 @@
 // Main.c was created by Mark Renard on 2/5/2020.
-// For now, this serves as a driver for a string queue implementation. 
+// This file specifies the driver for a utility which traverses a file system
+// in breadth first order beginning with either the current working directory
+// or the argued directory. See README for details. 
 
 #include "queue.h"
 #include "breadthfirst.h"
@@ -13,11 +15,19 @@
 #include <dirent.h>
 
 int main(int argc, char * const argv[]){
-	char ** dir = (char**) malloc(sizeof(char**));
-	Options opts;
 	
+	//
+	char ** dir = (char**) malloc(sizeof(char**));
+	Options opts; 
+	
+	// Parses options
 	opts = parseOptions(argc, argv, dir);
+
+	// Creates a new queue
 	Queue * q = newQueue();
 
+	// Traverses the file structure with root *dir in breadth frist order
 	breadthfirst(*dir, q, opts);
+
+	return 0;
 }

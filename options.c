@@ -7,9 +7,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <unistd.h>
 
 Options parseOptions(int argc, char * const argv[], char ** dir){
+	char errmsg[100]; // Buffer for perror
+	
 	// Creates string for help and error messages
 	char * usageFormat = "Usage: %s [-h] [-L -d -g -i -p =s =t =u | -l] [dirname]\n";
 	char * usageMsg = malloc(strlen(usageFormat) + strlen(argv[0]));
@@ -57,9 +60,14 @@ Options parseOptions(int argc, char * const argv[], char ** dir){
 			opts.size = 1;
 			opts.dateAndTimeModified = 1;
 			break;
-		default:
-			fprintf(stderr, "Invalid option!\n%s", usageMsg);
+		case '?':
+			sprintf(errmsg, "%s: Error: %c is an invalid option"\
+				, argv[0], optopt);
+			errno = 1;
+			perror(errmsg);
 			exit(1);
+		default:
+			break;
 		}
 		
 	}

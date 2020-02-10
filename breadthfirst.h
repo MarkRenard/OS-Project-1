@@ -2,6 +2,6 @@
 #define BREADTHFIRST_H
 
 #include "options.h"
-void breathfirst(char *, Queue *, Options opts);
+void breadthfirst(char *, Queue *, Options opts);
 
 #endif

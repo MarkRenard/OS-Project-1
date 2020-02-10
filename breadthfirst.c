@@ -14,12 +14,13 @@
 #include <dirent.h>
 
 char * getPath(char *, struct dirent *);
-int isADirectory(char *);
+int shouldFollow(char *, int);
+int notSelfOrParent(char *);
 
+// Prints selected info on files in breadth first order starting with root
 void breadthfirst (char * root, Queue * q, Options opts ){
 	char * currentPath;		// The current absolute path
 	DIR * currentDir;		// The current DIR
-
 	struct dirent * nextDirent;	// The next dirent
 	
 	// Visits each file in breadth first order
@@ -28,11 +29,17 @@ void breadthfirst (char * root, Queue * q, Options opts ){
 		currentDir = opendir(currentPath);
 
 		// Visits each file directly below currentPath
-		while (nextDirent = readdir(currentDir)){
+		while ( (nextDirent = readdir(currentDir)) ){
+
+			// Retrieves the path to each file below currentDir
 			char * nextPath = getPath(currentPath, nextDirent);
 			if (notSelfOrParent(nextPath)){
-				visit(nextPath, opts);
-				if (isADirectory(nextPath)){
+				
+				// Prints info on file as defined in visit.c
+				visit(nextPath, opts); 
+
+				// Equeues directories and links to them on -L
+				if (shouldFollow(nextPath, opts.links)){
 					enqueue(nextPath, q);
 				}
 			}
@@ -42,8 +49,12 @@ void breadthfirst (char * root, Queue * q, Options opts ){
 
 // Returns the name member of the dirent param appended to the path param
 char * getPath(char * pathParam, struct dirent * direntParam){
-	char * path = malloc(strlen(pathParam) + strlen(direntParam->d_name) + 2);
+	char * path; // The return value
+	
+	// Allocates memory for new path
+	path = malloc(strlen(pathParam) + strlen(direntParam->d_name) + 2);
 
+	// Appends file name to path
 	strcpy(path, pathParam);
 	strcat(path, "/");
 	strcat(path, direntParam->d_name);
@@ -51,26 +62,41 @@ char * getPath(char * pathParam, struct dirent * direntParam){
 	return path;
 }
 
-// Returns true if path is a direcoty. Adapted from Unix Systems Programming p. 157
-int isADirectory(char * path) {
-	struct stat statbuf;
+// True if the file is a directory, or if -L was entered and it's a link to one 
+int shouldFollow(char * path, int followLinks) {
+	struct stat statbuf; // stat struct for passed path
+	int statFlag = 0;    // Flag indicating that a stat struct was returned 
 
-	if (stat(path, &statbuf) == -1)
+	// Determines whether to follow links based on -L option
+	if (followLinks)
+		statFlag = stat(path, &statbuf);
+	else
+		statFlag = lstat(path, &statbuf);
+
+	// Returns true if stat struct returned and the file is a directory
+	if (statFlag == -1)
 		return 0;
 	else
 		return S_ISDIR(statbuf.st_mode);
 }
 
-// Returns true if the path does not end in /* or /**
+// Returns true if the path does not end in /. or /..
 int notSelfOrParent(char * path){
-	int pathLength = strlen(path);
+	int pathLength;	// The length of the path argument
+	char * last2;	// The last 2 characters of the path
+	char * last3;	// The last 3 characters of the path
+	
+	// Returns true if the path 
+	pathLength = strlen(path);
 	if (pathLength < 3) return 1;	
 
-	char * last2 = (char *) malloc(3);
+	// Returns false if the last to characters are /.
+	last2 = (char *) malloc(3);
 	strcpy(last2, &path[pathLength - 2]);	
 	if (strcmp(last2, "/.") == 0) return 0;
 
-	char * last3 = (char *) malloc(4);
+	// Returns false if the last two characters are /..
+	last3 = (char *) malloc(4);
 	strcpy(last3, &path[pathLength - 3]);
 	if (strcmp(last3, "/..") == 0) return 0;
 
